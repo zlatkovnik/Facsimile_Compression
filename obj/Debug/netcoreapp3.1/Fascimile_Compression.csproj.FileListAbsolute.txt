@@ -1,0 +1,13 @@
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\Fascimile_Compression.exe
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\Fascimile_Compression.deps.json
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\Fascimile_Compression.runtimeconfig.json
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\Fascimile_Compression.runtimeconfig.dev.json
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\Fascimile_Compression.dll
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\Fascimile_Compression.pdb
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.csprojAssemblyReference.cache
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.AssemblyInfoInputs.cache
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.AssemblyInfo.cs
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.csproj.CoreCompileInputs.cache
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.dll
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.pdb
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.genruntimeconfig.cache

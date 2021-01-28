@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "Fascimile_Compression/1.0.0": {
+        "runtime": {
+          "Fascimile_Compression.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Fascimile_Compression/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
