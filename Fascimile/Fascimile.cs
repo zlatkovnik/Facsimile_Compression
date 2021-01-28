@@ -22,6 +22,7 @@ namespace Compression
             Color[] colors = GetColorsFromString(data);
             CodedPaper = GetCodedPaper(colors);
             GenerateTree();
+
         }
 
 
@@ -106,6 +107,7 @@ namespace Compression
                         writer.Write((byte)CodedPaper[i].Color);
                     }
                 }
+                writer.Write((byte)Color.Nothing);
             }
         }
 
@@ -140,10 +142,8 @@ namespace Compression
         {
             for (int i = 0; i < codes.Count; i++)
             {
-                for (int j = 0; j < codes[i].RunLength; j++)
-                {
-                    writer.Write((byte)codes[i].Color);
-                }
+                writer.Write((byte)codes[i].Color);
+                writer.Write(codes[i].RunLength);
             }
         }
 
@@ -178,21 +178,15 @@ namespace Compression
 
         public static void ReadCodedPaperFromFile(List<Code> codedPaper, BinaryReader reader)
         {
-            uint count = 1;
-            byte color = reader.ReadByte();
             while (reader.BaseStream.Position != reader.BaseStream.Length)
             {
-                byte color2 = reader.ReadByte();
-                if (color != color2)
+                byte color = reader.ReadByte();
+                if ((Color)color == Color.Nothing)
                 {
-                    codedPaper.Add(new Code((Color)color, count));
-                    count = 1;
-                    color = color2;
+                    break;
                 }
-                else
-                {
-                    count++;
-                }
+                uint rl = reader.ReadUInt32();
+                codedPaper.Add(new Code((Color)color, rl));
             }
         }
 

@@ -5,6 +5,7 @@ namespace Compression
         public static void Compress(string inputFile, string outputFile)
         {
             var fas = new Fascimile(inputFile);
+            fas.Print();
             fas.SaveToFile(outputFile);
         }
 

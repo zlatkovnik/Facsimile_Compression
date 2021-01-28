@@ -7,7 +7,7 @@ namespace Fascimile_Compression
     {
         static void Main(string[] args)
         {
-            //Compressor.Compress("input.txt", "output.bin");
+            Compressor.Compress("input.txt", "output.bin");
             Compressor.Decompress("output.bin", "treci.txt");
         }
     }
