@@ -4,7 +4,7 @@ namespace Compression
 {
     public enum Color
     {
-        Nothing = -1,
+        Nothing = 2,
         White = 0,
         Black = 1
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using C5;
 
 namespace Compression
@@ -11,50 +12,18 @@ namespace Compression
         public Fascimile()
         {
             Root = null;
+            CodedPaper = null;
         }
-        public Fascimile(Color[] paper)
+
+        public Fascimile(string fileName)
         {
             Root = null;
-            CodedPaper = GetCodedPaper(paper);
+            string data = System.IO.File.ReadAllText(fileName);
+            Color[] colors = GetColorsFromString(data);
+            CodedPaper = GetCodedPaper(colors);
             GenerateTree();
         }
 
-        #region file
-        private static List<FNode> GetNodesFromCodes(List<Code> codes)
-        {
-
-            var map = new Dictionary<Code, FNode>();
-            for (int i = 0; i < codes.Count; i++)
-            {
-                //Ako se vec pojavljivala ova varijanta
-                FNode node;
-                if (map.TryGetValue(codes[i], out node))
-                {
-                    node.Frequency++;
-                }
-                //Ako se prvi put pojavljuje
-                else
-                {
-                    node = new FNode
-                    {
-                        Code = codes[i],
-                        Frequency = 1,
-                        Left = null,
-                        Right = null
-                    };
-                    map.Add(codes[i], node);
-                }
-            }
-
-            //Lista cvorova od svih varijanti ponavljanja
-            List<FNode> nodes = new List<FNode>();
-            foreach (var keyValuePair in map)
-            {
-                nodes.Add(keyValuePair.Value);
-            }
-            return nodes;
-        }
-        #endregion
 
         #region API
         public virtual void GenerateTree()
@@ -124,7 +93,148 @@ namespace Compression
 
         #endregion
 
+        #region file
+
+        public void SavePaperToTextFile(string fileName)
+        {
+            using (TextWriter writer = File.CreateText(fileName))
+            {
+                for (int i = 0; i < CodedPaper.Count; i++)
+                {
+                    for (int j = 0; j < CodedPaper[i].RunLength; j++)
+                    {
+                        writer.Write((byte)CodedPaper[i].Color);
+                    }
+                }
+            }
+        }
+
+        public void SaveToFile(string fileName)
+        {
+            using (BinaryWriter writer = new BinaryWriter(new FileStream(fileName, FileMode.Create)))
+            {
+                SaveTreeToFile(Root, writer);
+                SavePaperToFile(CodedPaper, writer);
+                writer.Write((byte)Color.Nothing);
+            }
+        }
+
+        private static void SaveTreeToFile(FNode node, BinaryWriter writer)
+        {
+            if (node == null)
+            {
+                writer.Write('#');
+            }
+            else
+            {
+                byte color = (byte)node.Code.Color;
+                uint runLength = node.Code.RunLength;
+                writer.Write(color);
+                writer.Write(runLength);
+                SaveTreeToFile(node.Left, writer);
+                SaveTreeToFile(node.Right, writer);
+            }
+        }
+
+        private static void SavePaperToFile(List<Code> codes, BinaryWriter writer)
+        {
+            for (int i = 0; i < codes.Count; i++)
+            {
+                for (int j = 0; j < codes[i].RunLength; j++)
+                {
+                    writer.Write((byte)codes[i].Color);
+                }
+            }
+        }
+
+        public void LoadFromFile(string fileName)
+        {
+            using (BinaryReader reader = new BinaryReader(new FileStream(fileName, FileMode.Open)))
+            {
+                ReadTreeFromFile(Root, reader);
+                CodedPaper = new List<Code>();
+                ReadCodedPaperFromFile(CodedPaper, reader);
+            }
+        }
+
+        private static void ReadTreeFromFile(FNode node, BinaryReader reader)
+        {
+            byte color = reader.ReadByte();
+            if (color == '#')
+            {
+                return;
+            }
+            uint rl = reader.ReadUInt32();
+            node = new FNode
+            {
+                Code = new Code((Color)color, rl),
+                Frequency = 1,
+                Left = null,
+                Right = null
+            };
+            ReadTreeFromFile(node.Left, reader);
+            ReadTreeFromFile(node.Right, reader);
+        }
+
+        public static void ReadCodedPaperFromFile(List<Code> codedPaper, BinaryReader reader)
+        {
+            uint count = 1;
+            byte color = reader.ReadByte();
+            while (reader.BaseStream.Position != reader.BaseStream.Length)
+            {
+                byte color2 = reader.ReadByte();
+                if (color != color2)
+                {
+                    codedPaper.Add(new Code((Color)color, count));
+                    count = 1;
+                    color = color2;
+                }
+                else
+                {
+                    count++;
+                }
+            }
+        }
+
+        #endregion
+
         #region Utility
+
+
+        private static List<FNode> GetNodesFromCodes(List<Code> codes)
+        {
+
+            var map = new Dictionary<Code, FNode>();
+            for (int i = 0; i < codes.Count; i++)
+            {
+                //Ako se vec pojavljivala ova varijanta
+                FNode node;
+                if (map.TryGetValue(codes[i], out node))
+                {
+                    node.Frequency++;
+                }
+                //Ako se prvi put pojavljuje
+                else
+                {
+                    node = new FNode
+                    {
+                        Code = codes[i],
+                        Frequency = 1,
+                        Left = null,
+                        Right = null
+                    };
+                    map.Add(codes[i], node);
+                }
+            }
+
+            //Lista cvorova od svih varijanti ponavljanja
+            List<FNode> nodes = new List<FNode>();
+            foreach (var keyValuePair in map)
+            {
+                nodes.Add(keyValuePair.Value);
+            }
+            return nodes;
+        }
         private List<Code> GetCodedPaper(Color[] colors)
         {
             var nodes = new List<Code>();
@@ -145,6 +255,28 @@ namespace Compression
                 }
             }
             return nodes;
+        }
+        private Color[] GetColorsFromString(string data)
+        {
+            Color[] colors = new Color[data.Length + 1];
+            for (int i = 0; i < data.Length; i++)
+            {
+                switch (data[i])
+                {
+                    case '1':
+                        colors[i] = Color.Black;
+                        break;
+                    case '0':
+                        colors[i] = Color.White;
+                        break;
+                    default:
+                        colors[i] = Color.Nothing;
+                        break;
+                }
+            }
+            //Ovo radim zato sto zadnji element mora da bude Color.Nothing
+            colors[colors.Length - 1] = Color.Nothing;
+            return colors;
         }
         private string GetCode(Code c)
         {
