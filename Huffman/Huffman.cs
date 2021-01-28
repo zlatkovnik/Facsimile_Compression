@@ -54,11 +54,10 @@ namespace Compression
             return nodes;
         }
 
-
         #endregion
 
         #region API
-        public void GenerateTree()
+        public virtual void GenerateTree()
         {
             List<Node> nodes = GetNodesFromString(Text);
 

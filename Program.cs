@@ -7,10 +7,12 @@ namespace Fascimile_Compression
     {
         static void Main(string[] args)
         {
-            Huffman huf = new Huffman("Tu tu ru tu tu tu ru tu broj je zauzet");
-            huf.Print("");
-            string compressed = huf.Compress();
-            string decompressed = huf.Decompress(compressed);
+            //Kodira se jedan nothing na kraj
+            Color[] paper = new Color[] { Color.White, Color.White, Color.Black, Color.Black, Color.White, Color.Nothing };
+            Fascimile fas = new Fascimile(paper);
+            fas.Print();
+            string compressed = fas.Compress();
+            string decompressed = fas.Decompress(compressed);
             Console.WriteLine(decompressed);
         }
     }
