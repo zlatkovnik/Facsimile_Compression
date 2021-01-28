@@ -1,4 +1,5 @@
 ﻿using System;
+using Compression;
 
 namespace Fascimile_Compression
 {
@@ -6,7 +7,11 @@ namespace Fascimile_Compression
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Huffman huf = new Huffman("Tu tu ru tu tu tu ru tu broj je zauzet");
+            huf.Print("");
+            string compressed = huf.Compress();
+            string decompressed = huf.Decompress(compressed);
+            Console.WriteLine(decompressed);
         }
     }
 }
