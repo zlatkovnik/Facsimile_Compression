@@ -13,3 +13,8 @@ C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\net
 C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.genruntimeconfig.cache
 C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\C5.dll
 C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\obj\Debug\netcoreapp3.1\Fascimile_Compression.csproj.CopyComplete
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\System.Drawing.Common.dll
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp3.0\System.Drawing.Common.dll
+C:\Users\zlatk\Desktop\Facsimile Compression\Fascimile_Compression\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll
