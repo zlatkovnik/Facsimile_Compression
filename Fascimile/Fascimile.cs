@@ -3,75 +3,39 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.IO;
 using C5;
+using System.Text;
 
 namespace Compression
 {
-    public enum FileType
-    {
-        Text = 0,
-        PNG = 1,
-        Binary = 2
-    }
     public static class Fascimile
     {
 
 
         #region API
 
-        public static void Compress(string inputFile, string outputFile, FileType type)
+        public static void Compress(string inputFile, string outputFile)
         {
             string data = "";
-            if (type == FileType.Text)
-            {
-                data = System.IO.File.ReadAllText(inputFile);
-            }
-            else if (type == FileType.PNG)
-            {
-                Bitmap bitmap = new Bitmap(inputFile);
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    for (int x = 0; x < bitmap.Width; x++)
-                    {
-                        var pixel = bitmap.GetPixel(x, y);
-                        var brightness = (byte)(pixel.R * 0.2126 + pixel.G * 0.7152 + pixel.B * 0.0722);
-                        if (brightness < 128)
-                        {
-                            data += '1';
-                        }
-                        else
-                        {
-                            data += '0';
-                        }
-                    }
-                }
-                bitmap.Dispose();
-            }
+            data = System.IO.File.ReadAllText(inputFile);
             Color[] colors = GetColorsFromString(data);
             List<Code> codedPaper = GetCodedPaper(colors);
             FNode root = GenerateTree(codedPaper);
             string text = "";
             for (int i = 0; i < codedPaper.Count; i++)
             {
-                text += GetCode(root, codedPaper[i]);
+                text += GetPath(root, codedPaper[i]);
             }
             SaveToFile(root, codedPaper, outputFile);
-
-            PrintCode(root, " ");
         }
 
-        public static void Decompress(string inputFile, string outputFile, FileType type)
+        public static void Decompress(string inputFile, string outputFile)
         {
-            FNode root = null;
-            List<Code> codedPaper = null;
-            LoadFromFile(ref root, ref codedPaper, inputFile);
-            if (type == FileType.Text)
-            {
-                SavePaperToTextFile(codedPaper, outputFile);
-            }
-            else
-            {
 
-            }
+            var res = LoadFromFile(inputFile);
+            FNode root = res.Item1;
+            List<Code> codedPaper = res.Item2;
+            SavePaperToTextFile(codedPaper, outputFile);
+
         }
 
         #endregion
@@ -126,7 +90,8 @@ namespace Compression
             using (BinaryWriter writer = new BinaryWriter(new FileStream(fileName, FileMode.Create)))
             {
                 SaveTreeToFile(root, writer);
-                SavePaperToFile(codedPaper, writer);
+                SavePaperToFileOptimized(root, codedPaper, writer);
+                //SavePaperToFile(root, codedPaper, writer);
                 writer.Write((byte)Color.Nothing);
             }
         }
@@ -148,26 +113,67 @@ namespace Compression
             }
         }
 
-        private static void SavePaperToFile(List<Code> codes, BinaryWriter writer)
+        private static void SavePaperToFile(FNode root, List<Code> codes, BinaryWriter writer)
         {
             for (int i = 0; i < codes.Count; i++)
             {
-                writer.Write((byte)codes[i].Color);
-                writer.Write(codes[i].RunLength);
+                string code = GetPath(root, codes[i]);
+                byte[] bytes = Encoding.ASCII.GetBytes(code);
+                //Pretvaram ascii u byte
+                for (int j = 0; j < bytes.Length; j++)
+                    bytes[j] -= (byte)'0';
+                writer.Write(bytes);
             }
         }
 
-        private static void LoadFromFile(ref FNode root, ref List<Code> codedPaper, string fileName)
+        private static void SavePaperToFileOptimized(FNode root, List<Code> codes, BinaryWriter writer)
         {
+            int bitPosition = 7;
+            byte buf = 0;
+            for (int i = 0; i < codes.Count; i++)
+            {
+                string path = GetPath(root, codes[i]);
+                for (int j = 0; j < path.Length; j++)
+                {
+                    byte bit = (byte)(path[j] - '0');
+                    bit = (byte)(bit << bitPosition);
+                    bit = (byte)(bit & (0x01 << bitPosition));
+                    buf |= (byte)(bit);
+                    bitPosition--;
+                    if (bitPosition < 0)
+                    {
+                        writer.Write(buf);
+                        buf = 0;
+                        bitPosition = 7;
+                    }
+                }
+            }
+            if (bitPosition > 0)
+            {
+                writer.Write(buf);
+            }
+        }
+
+        private static Tuple<FNode, List<Code>> LoadFromFile(string fileName)
+        {
+            FNode root;
+            List<Code> codedPaper;
             using (BinaryReader reader = new BinaryReader(new FileStream(fileName, FileMode.Open)))
             {
-                ReadTreeFromFile(root, reader);
-                codedPaper = new List<Code>();
-                ReadCodedPaperFromFile(codedPaper, reader);
+                root = ReadTreeFromFile(reader);
+                codedPaper = ReadCodedPaperFromFileOptimized(root, reader);
             }
+            return new Tuple<FNode, List<Code>>(root, codedPaper);
         }
 
-        private static void ReadTreeFromFile(FNode node, BinaryReader reader)
+        private static FNode ReadTreeFromFile(BinaryReader reader)
+        {
+            FNode root = new FNode();
+            ReadTreeFromFile(ref root, reader);
+            return root;
+        }
+
+        private static void ReadTreeFromFile(ref FNode node, BinaryReader reader)
         {
             byte color = reader.ReadByte();
             if (color == '#')
@@ -182,25 +188,66 @@ namespace Compression
                 Left = null,
                 Right = null
             };
-            ReadTreeFromFile(node.Left, reader);
-            ReadTreeFromFile(node.Right, reader);
+            ReadTreeFromFile(ref node.Left, reader);
+            ReadTreeFromFile(ref node.Right, reader);
         }
 
-        private static void ReadCodedPaperFromFile(List<Code> codedPaper, BinaryReader reader)
+        private static List<Code> ReadCodedPaperFromFileOptimized(FNode root, BinaryReader reader)
         {
+            List<Code> codedPaper = new List<Code>();
+            FNode node = root;
+            byte buf = reader.ReadByte();
+            int bitPosition = 7;
+            //Console.WriteLine(reader.BaseStream.Position + " " + reader.BaseStream.Length);
             while (reader.BaseStream.Position != reader.BaseStream.Length)
             {
-                byte color = reader.ReadByte();
-                if ((Color)color == Color.Nothing)
+                while (!(node.Left == null && node.Right == null))
                 {
-                    break;
+                    byte bit = (byte)((buf >> bitPosition) & 0x01);
+                    if (bit == 0)
+                    {
+                        node = node.Left;
+                    }
+                    else
+                    {
+                        node = node.Right;
+                    }
+                    bitPosition--;
+                    if (bitPosition < 0)
+                    {
+                        bitPosition = 7;
+                        buf = reader.ReadByte();
+                    }
                 }
-                uint rl = reader.ReadUInt32();
-                codedPaper.Add(new Code((Color)color, rl));
+                codedPaper.Add(new Code(node.Code.Color, node.Code.RunLength));
+                node = root;
             }
+            return codedPaper;
         }
 
-
+        private static List<Code> ReadCodedPaperFromFile(FNode root, BinaryReader reader)
+        {
+            List<Code> codedPaper = new List<Code>();
+            while (reader.BaseStream.Position != reader.BaseStream.Length - 1)
+            {
+                FNode node = root;
+                while (!(node.Left == null && node.Right == null))
+                {
+                    byte turn = reader.ReadByte();
+                    if (turn == 0)
+                    {
+                        node = node.Left;
+                    }
+                    else
+                    {
+                        node = node.Right;
+                    }
+                }
+                Code code = new Code(node.Code.Color, node.Code.RunLength);
+                codedPaper.Add(code);
+            }
+            return codedPaper;
+        }
 
         private static List<FNode> GetNodesFromCodes(List<Code> codes)
         {
@@ -279,10 +326,10 @@ namespace Compression
             colors[colors.Length - 1] = Color.Nothing;
             return colors;
         }
-        private static string GetCode(FNode root, Code c)
+        private static string GetPath(FNode root, Code c)
         {
             var path = new System.Collections.Generic.LinkedList<byte>();
-            GetCode(root, path, c, 255);
+            GetPath(root, path, c, 255);
             string code = "";
             foreach (byte direction in path)
             {
@@ -291,7 +338,7 @@ namespace Compression
             return code;
         }
 
-        private static bool GetCode(FNode node, System.Collections.Generic.LinkedList<byte> path, Code c, byte code)
+        private static bool GetPath(FNode node, System.Collections.Generic.LinkedList<byte> path, Code c, byte code)
         {
             if (node == null)
                 return false;
@@ -304,7 +351,7 @@ namespace Compression
                 return true;
 
             // Ako nisam nasao trazim levo pa desno
-            if (GetCode(node.Left, path, c, 0) || GetCode(node.Right, path, c, 1))
+            if (GetPath(node.Left, path, c, 0) || GetPath(node.Right, path, c, 1))
                 return true;
 
             // Ako nije ni u levom ni u desnom podstablu izbacuje se putanja  

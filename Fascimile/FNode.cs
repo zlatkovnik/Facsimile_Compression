@@ -10,10 +10,10 @@ namespace Compression
     }
     public class FNode : IComparable
     {
-        public uint Frequency { get; set; }
-        public Code Code { get; set; }
-        public FNode Left { get; set; }
-        public FNode Right { get; set; }
+        public uint Frequency;
+        public Code Code;
+        public FNode Left;
+        public FNode Right;
 
         public int CompareTo(object obj)
         {
