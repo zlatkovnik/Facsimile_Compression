@@ -20,11 +20,6 @@ namespace Compression
             Color[] colors = GetColorsFromString(data);
             List<Code> codedPaper = GetCodedPaper(colors);
             FNode root = GenerateTree(codedPaper);
-            string text = "";
-            for (int i = 0; i < codedPaper.Count; i++)
-            {
-                text += GetPath(root, codedPaper[i]);
-            }
             SaveToFile(root, codedPaper, outputFile);
         }
 
