@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Compression
 {
-    public static class Fascimile
+    public static class Facsimile
     {
 
 
@@ -26,7 +26,6 @@ namespace Compression
                 text += GetPath(root, codedPaper[i]);
             }
             SaveToFile(root, codedPaper, outputFile);
-            PrintCode(root, " ");
         }
 
         public static void Decompress(string inputFile, string outputFile)
@@ -36,7 +35,6 @@ namespace Compression
             FNode root = res.Item1;
             List<Code> codedPaper = res.Item2;
             SavePaperToTextFile(codedPaper, outputFile);
-            PrintCode(root, " ");
         }
 
         #endregion
@@ -181,7 +179,7 @@ namespace Compression
             {
                 return;
             }
-            uint rl = reader.ReadUInt32();
+            byte rl = reader.ReadByte();
             node = new FNode
             {
                 Code = new Code((Color)color, rl),
