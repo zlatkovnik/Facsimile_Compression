@@ -84,7 +84,6 @@ namespace Compression
                 pQueue.Add(mixed);
             }
         }
-
         public string Compress()
         {
             string text = "";

@@ -26,6 +26,7 @@ namespace Compression
                 text += GetPath(root, codedPaper[i]);
             }
             SaveToFile(root, codedPaper, outputFile);
+            PrintCode(root, " ");
         }
 
         public static void Decompress(string inputFile, string outputFile)
@@ -35,7 +36,7 @@ namespace Compression
             FNode root = res.Item1;
             List<Code> codedPaper = res.Item2;
             SavePaperToTextFile(codedPaper, outputFile);
-
+            PrintCode(root, " ");
         }
 
         #endregion
@@ -107,7 +108,7 @@ namespace Compression
                 byte color = (byte)node.Code.Color;
                 uint runLength = node.Code.RunLength;
                 writer.Write(color);
-                writer.Write(runLength);
+                writer.Write((byte)runLength);
                 SaveTreeToFile(node.Left, writer);
                 SaveTreeToFile(node.Right, writer);
             }
