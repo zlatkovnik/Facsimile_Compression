@@ -22,7 +22,7 @@ namespace Fascimile_Compression
             //     Console.WriteLine("-{input} -{output} -optional:{'c'-compression, 'd'-decompression}");
             // }
             Fascimile.Compress("input.txt", "output.bin");
-            Fascimile.Compress("input.txt", "output.bin");
+            Fascimile.Compress("output.bin", "treci.txt");
         }
     }
 }
